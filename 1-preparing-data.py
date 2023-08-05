@@ -1,10 +1,10 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
 
 # Getting data ready to be used with ML
 # 1. Split the data into features (X) and labels (y)
@@ -96,7 +96,6 @@ car_sales_missing["Doors"].fillna(4, inplace=True)
 
 car_sales_missing.dropna(inplace=True)
 
-
 print(car_sales_missing.isna().sum())
 
 # Reassign X and y
@@ -117,3 +116,54 @@ X_train, X_test, y_train, y_test = train_test_split(transformed_X, y, test_size=
 model = RandomForestRegressor()
 model.fit(X_train, y_train)
 print(model.score(X_test, y_test))
+
+# Filling missing values using scikit-learn
+
+car_sales_missing = pd.read_csv("data/car-sales-extended-missing-data.csv")
+car_sales_missing.dropna(subset=["Price"], inplace=True)
+
+X = car_sales_missing.drop("Price", axis=1)
+y = car_sales_missing["Price"]
+
+# Fill categorical values with 'missing' & numerical values with mean using skikit library
+cat_imputer = SimpleImputer(strategy="constant", fill_value="missing")
+door_imputer = SimpleImputer(strategy="constant", fill_value=4)
+num_imputer = SimpleImputer(strategy="mean")
+
+# Define columns
+cat_features = ["Make", "Colour"]
+door_feature = ["Doors"]
+num_features = ["Odometer (KM)"]
+
+# Create an imputer (something that fills missing data)
+
+imputer = ColumnTransformer([
+    ("cat_imputer", cat_imputer, cat_features),
+    ("door_imputer", door_imputer, door_feature),
+    ("num_imputer", num_imputer, num_features)
+])
+
+# Transform the data by using the column transformer we passed our imputers into
+
+filled_X = imputer.fit_transform(X)
+print(filled_X)
+
+car_sales_filled = pd.DataFrame(filled_X, columns=["Make", "Colour", "Doors", "Odometer (KM)"])
+
+categorical_features = ["Make", "Colour", "Doors"]
+one_hot = OneHotEncoder()
+transformer = ColumnTransformer([("one_hot", one_hot, categorical_features)], remainder="passthrough")
+
+transformed_X = transformer.fit_transform(car_sales_filled)
+
+print(transformed_X)
+
+# Data is now numerical and has no missing values, can be used to fit a model
+
+np.random.seed(42)
+
+X_train, X_test, y_train, y_test = train_test_split(transformed_X, y, test_size=.2)
+
+model = RandomForestRegressor()
+model.fit(X_train, y_train)
+model.score()
