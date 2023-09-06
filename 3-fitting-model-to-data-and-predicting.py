@@ -2,9 +2,8 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import accuracy_score
-from sklearn.datasets import fetch_california_housing
+
 
 heart_disease = pd.read_csv("data/heart-disease.csv")
 
