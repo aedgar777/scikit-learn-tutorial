@@ -2,10 +2,14 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import RandomForestRegressor
 import pandas as pd
 import numpy as np
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 from sklearn.datasets import fetch_california_housing  ## sk
 from sklearn.metrics import roc_curve
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
 
 # Three ways to evaluate SkiKit-learn models/estimators
 # 1. Built-in score() method
@@ -95,6 +99,29 @@ fpr, tpr, thresholds = roc_curve(y_test, y_probs_positive)
 # tests our predictions against the corresponding items we
 # already know the outcome for to see the false positive/negative rate of our model
 
-#Check FPR
+# Check FPR
 
 print(fpr)
+
+# Confusion Matrix (Quick way to compare the labels a model predicts and the actual labels it was supposed to predict.)
+# In essence, giving you an idea of where a model is getting confused
+
+y_preds = clf.predict(X_test)
+print(confusion_matrix(y_test, y_preds))
+
+# Visualize confusion matrix with pd crosstab()
+
+# provides chart that shows how many instances there are of the predicted and actual labels (y) matched or
+# didn't match
+pd.crosstab(y_test, y_preds, rownames=["Actual Labels"], colnames=["Predicted Labels"])
+
+# Make our confusion matrix more visual with Seaborn's heatmap()
+
+# Set the font scale
+sns.set(font_scale=1.5)
+# Create a confusion matrix
+conf_mat = confusion_matrix(y_test, y_preds)
+
+sns.heatmap(conf_mat)
+plt.show()
+
